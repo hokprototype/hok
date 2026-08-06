@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Haus of Katherine</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  :root {
+    --bg-dark: #2C1A0E;
+    --bg-mid: #3D2410;
+    --bg-card: #4A2E14;
+    --bg-light: #5C3A1A;
+    --gold: #C8A96E;
+    --gold-light: #E2C98A;
+    --cream: #F5EDD6;
+    --ivory: #EDE0C4;
+    --text-white: #FFFFFF;
+    --text-cream: #F5EDD6;
+    --text-muted: #A89070;
+    --accent-red: #8B2020;
+  }
+
+  body {
+    background: #1A0F06;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Georgia', 'Times New Roman', serif;
+  }
+
+  .phone-shell {
+    width: 390px;
+    height: 844px;
+    background: var(--bg-dark);
+    border-radius: 44px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(200,169,110,0.3);
+  }
+
+  /* Silk texture mixin - applied to all screens */
+  .silk-bg {
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E") repeat,
+      radial-gradient(ellipse at 15% 25%, rgba(200,169,110,0.07) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 75%, rgba(200,169,110,0.05) 0%, transparent 45%),
+      radial-gradient(ellipse at 50% 50%, rgba(92,58,26,0.4) 0%, transparent 70%),
+      linear-gradient(145deg, #3D2410 0%, #2C1A0E 35%, #1E1008 65%, #2A1A0C 100%);
+  }
+
+    .screen {
+    display: flex;
+    visibility: hidden;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E") repeat,
+      radial-gradient(ellipse at 15% 25%, rgba(200,169,110,0.07) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 75%, rgba(200,169,110,0.05) 0%, transparent 45%),
+      linear-gradient(145deg, #3D2410 0%, #2C1A0E 35%, #1E1008 65%, #2A1A0C 100%);
+    flex-direction: column;
+    overflow: hidden;
+    position: absolute;
+    top: 0; left: 0;
+  }
+  .screen.active { visibility: visible; pointer-events: auto; }
+
+  /* Status bar */
+  .status-bar {
+    height: 44px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .status-time { color: var(--cream); font-size: 15px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .status-icons { color: var(--cream); font-size: 13px; font-family: -apple-system, sans-serif; }
+
+  /* Bottom nav */
+  .bottom-nav {
+    height: 80px;
+    background: rgba(44,26,14,0.97);
+    border-top: 1px solid rgba(200,169,110,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 8px 16px;
+    flex-shrink: 0;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 12px;
+    transition: background 0.2s;
+  }
+  .nav-item.active .nav-icon { color: var(--gold); }
+  .nav-item.active .nav-label { color: var(--gold); }
+  .nav-icon { width: 24px; height: 24px; color: var(--text-muted); display: flex; align-items: center; justify-content: center; }
+  .nav-icon svg { width: 22px; height: 22px; stroke: var(--text-muted); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.2s; }
+  .nav-item.active .nav-icon svg { stroke: var(--gold); }
+  .nav-label { font-size: 10px; color: var(--text-muted); font-family: -apple-system, sans-serif; letter-spacing: 0.5px; }
+
+  /* Scrollable content */
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+
+  /* Typography */
+  .screen-title { color: var(--gold); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; font-family: -apple-system, sans-serif; }
+  .heading-xl { color: var(--cream); font-size: 28px; line-height: 1.2; }
+  .heading-lg { color: var(--cream); font-size: 22px; line-height: 1.3; }
+  .heading-md { color: var(--cream); font-size: 18px; }
+  .body-text { color: var(--ivory); font-size: 14px; line-height: 1.6; font-family: -apple-system, sans-serif; }
+  .muted-text { color: var(--text-muted); font-size: 12px; font-family: -apple-system, sans-serif; }
+
+  /* Buttons */
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--bg-dark);
+    border: none;
+    border-radius: 14px;
+    padding: 16px 24px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    width: 100%;
+    font-family: -apple-system, sans-serif;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 14px;
+    padding: 14px 24px;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    font-family: -apple-system, sans-serif;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: -apple-system, sans-serif;
+    text-decoration: underline;
+  }
+
+  /* Input fields */
+  .input-field {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(200,169,110,0.25);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--cream);
+    font-size: 15px;
+    width: 100%;
+    outline: none;
+    font-family: -apple-system, sans-serif;
+  }
+  .input-label {
+    color: var(--text-muted);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+    font-family: -apple-system, sans-serif;
+  }
+
+  /* Gold divider */
+  .gold-line { height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 0; }
+
+  /* Cards */
+  .service-card {
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .service-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(44,26,14,0.92));
+    padding: 20px 14px 14px;
+  }
+  .card-title { color: var(--cream); font-size: 15px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .card-sub { color: var(--gold); font-size: 11px; letter-spacing: 1px; font-family: -apple-system, sans-serif; }
+
+  /* Texture overlay for dark screens */
+  .texture-bg {
+    background: 
+      radial-gradient(ellipse at 20% 20%, rgba(200,169,110,0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(200,169,110,0.04) 0%, transparent 50%),
+      linear-gradient(160deg, #3D2410 0%, #2C1A0E 40%, #1E1008 100%);
+  }
+
+  /* ===================== SCREEN 1: SPLASH ===================== */
+  #splash {
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(ellipse at 30% 30%, #4A2E14 0%, #2C1A0E 40%, #1A0F06 100%);
+  }
+  .splash-logo { width: 150px; height: 156px; object-fit: contain; margin-bottom: 28px; filter: drop-shadow(0 0 24px rgba(245,236,215,0.3)); }
+  .splash-brand { color: var(--cream); font-size: 26px; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 8px; }
+  .splash-tagline { color: var(--gold); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; }
+
+  /* ===================== SCREEN 2: ONBOARDING 1 ===================== */
+  #onboard1 {
+    background: 
+      radial-gradient(ellipse at 50% 0%, rgba(200,169,110,0.12) 0%, transparent 60%),
+      linear-gradient(180deg, #3D2410 0%, #2C1A0E 50%, #1A0F06 100%);
+    justify-content: space-between;
+    padding: 60px 32px 48px;
+  }
+
+  /* ===================== SCREEN 3: ONBOARDING 2 ===================== */
+  #onboard2 { position: relative; }
+  #onboard2 .bg-img { position: absolute; top: 0; left: 0; right: 0; bottom: 0; object-fit: cover; width: 100%; height: 100%; opacity: 0.35; }
+  #onboard2 .overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(44,26,14,0.3) 0%, rgba(44,26,14,0.85) 60%, rgba(26,15,6,0.98) 100%); }
+  #onboard2 .content { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; padding: 0 32px 48px; }
+
+  /* ===================== SCREEN 4: FACE ID ===================== */
+  #faceid {
+    background: linear-gradient(180deg, #2C1A0E 0%, #1A0F06 100%);
+    justify-content: space-between;
+    padding: 0 32px 40px;
+  }
+  .faceid-circle {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    box-shadow: 0 0 30px rgba(200,169,110,0.2);
+  }
+  .faceid-icon { display: flex; align-items: center; justify-content: center; }
+
+  /* ===================== SCREEN 5: HOME ===================== */
+  #home { }
+  .home-header {
+    padding: 0 20px 16px;
+    background: linear-gradient(180deg, var(--bg-dark) 80%, transparent);
+  }
+  .greeting { color: var(--text-muted); font-size: 13px; font-family: -apple-system, sans-serif; margin-bottom: 2px; }
+  .greeting-name { color: var(--cream); font-size: 22px; }
+  .featured-scroll { display: flex; gap: 14px; padding: 0 20px; overflow-x: auto; }
+  .featured-scroll::-webkit-scrollbar { display: none; }
+  .featured-card { width: 200px; height: 130px; border-radius: 14px; overflow: hidden; position: relative; flex-shrink: 0; cursor: pointer; }
+  .featured-card img { width: 100%; height: 100%; object-fit: cover; }
+  .featured-card .fc-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(26,15,6,0.9)); padding: 14px 12px 10px; }
+  .fc-name { color: var(--cream); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .fc-tag { color: var(--gold); font-size: 10px; letter-spacing: 1px; font-family: -apple-system, sans-serif; }
+  .concierge-bar {
+    margin: 16px 20px 0;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(200,169,110,0.2);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+  .concierge-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold); }
+  .concierge-info { flex: 1; }
+  .concierge-name { color: var(--cream); font-size: 14px; font-family: -apple-system, sans-serif; }
+  .concierge-status { color: var(--gold); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .concierge-btn { background: var(--gold); color: var(--bg-dark); border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: -apple-system, sans-serif; }
+  .section-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 10px; }
+  .section-title { color: var(--gold); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-family: -apple-system, sans-serif; }
+  .section-see-all { color: var(--text-muted); font-size: 12px; font-family: -apple-system, sans-serif; cursor: pointer; }
+
+  /* ===================== SCREEN 6: SERVICES ===================== */
+  #services { }
+  .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px 16px; }
+  .svc-card { border-radius: 14px; overflow: hidden; position: relative; height: 110px; cursor: pointer; }
+  .svc-card img { width: 100%; height: 100%; object-fit: cover; }
+  .svc-card .svc-overlay { position: absolute; inset: 0; background: linear-gradient(transparent 20%, rgba(26,15,6,0.88)); display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; }
+  .svc-name { color: var(--cream); font-size: 12px; font-weight: 700; font-family: -apple-system, sans-serif; line-height: 1.2; }
+  .velvet-card { grid-column: 1 / -1; height: 80px; background: linear-gradient(135deg, #3D1040, #2A0D2E); border: 1px solid rgba(160,90,180,0.5); border-radius: 14px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; cursor: pointer; }
+  .velvet-title { color: #D4A8E8; font-size: 16px; letter-spacing: 2px; }
+  .velvet-sub { color: rgba(212,168,232,0.6); font-size: 11px; font-family: -apple-system, sans-serif; margin-top: 2px; }
+  .velvet-arrow { color: #D4A8E8; font-size: 20px; }
+
+  /* ===================== SCREEN 7: SERVICE DETAIL ===================== */
+  #service-detail { }
+  .detail-hero { height: 220px; position: relative; flex-shrink: 0; }
+  .detail-hero img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-hero-overlay { position: absolute; inset: 0; background: linear-gradient(transparent 40%, rgba(44,26,14,0.95)); }
+  .detail-back { position: absolute; top: 52px; left: 16px; width: 36px; height: 36px; background: rgba(44,26,14,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--cream); font-size: 18px; }
+  .detail-body { padding: 20px; flex: 1; overflow-y: auto; }
+  .detail-title { color: var(--cream); font-size: 22px; margin-bottom: 4px; }
+  .detail-category { color: var(--gold); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-family: -apple-system, sans-serif; margin-bottom: 12px; }
+  .detail-rating { display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+  .stars { color: var(--gold); font-size: 14px; }
+  .rating-text { color: var(--text-muted); font-size: 12px; font-family: -apple-system, sans-serif; }
+  .detail-desc { color: var(--ivory); font-size: 14px; line-height: 1.7; font-family: -apple-system, sans-serif; margin-bottom: 20px; }
+  .hok-recommends { background: rgba(200,169,110,0.08); border-left: 2px solid var(--gold); border-radius: 0 10px 10px 0; padding: 12px 14px; margin-bottom: 20px; }
+  .hok-rec-label { color: var(--gold); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-family: -apple-system, sans-serif; margin-bottom: 4px; }
+  .hok-rec-text { color: var(--ivory); font-size: 13px; font-family: -apple-system, sans-serif; line-height: 1.5; }
+  .detail-footer { padding: 16px 20px; border-top: 1px solid rgba(200,169,110,0.15); flex-shrink: 0; }
+
+  /* ===================== SCREEN 8: BOOKING FORM ===================== */
+  #booking { }
+  .booking-header { padding: 0 20px 20px; }
+  .booking-form { padding: 0 20px; display: flex; flex-direction: column; gap: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .booking-note { background: rgba(200,169,110,0.06); border: 1px solid rgba(200,169,110,0.2); border-radius: 12px; padding: 12px 14px; margin: 0 20px; }
+  .booking-note-text { color: var(--text-muted); font-size: 12px; font-family: -apple-system, sans-serif; line-height: 1.5; }
+  .booking-footer { padding: 16px 20px 0; }
+
+  /* ===================== SCREEN 9: CONFIRMATION ===================== */
+  #confirmation {
+    justify-content: center;
+    align-items: center;
+    padding: 40px 32px;
+    background: linear-gradient(180deg, #2C1A0E 0%, #1A0F06 100%);
+  }
+  .confirm-icon { width: 80px; height: 80px; border-radius: 50%; background: rgba(200,169,110,0.15); border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 36px; margin-bottom: 24px; }
+  .confirm-title { color: var(--cream); font-size: 24px; text-align: center; margin-bottom: 8px; }
+  .confirm-sub { color: var(--text-muted); font-size: 14px; text-align: center; font-family: -apple-system, sans-serif; line-height: 1.6; margin-bottom: 32px; }
+  .confirm-detail-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(200,169,110,0.2); border-radius: 14px; padding: 16px; width: 100%; margin-bottom: 32px; }
+  .confirm-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(200,169,110,0.1); }
+  .confirm-row:last-child { border-bottom: none; }
+  .confirm-key { color: var(--text-muted); font-size: 12px; font-family: -apple-system, sans-serif; }
+  .confirm-val { color: var(--cream); font-size: 13px; font-family: -apple-system, sans-serif; font-weight: 600; }
+
+  /* ===================== SCREEN 10: MY BOOKINGS ===================== */
+  #my-bookings { }
+  .bookings-list { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+  .booking-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(200,169,110,0.15); border-radius: 14px; padding: 14px 16px; display: flex; gap: 12px; align-items: center; cursor: pointer; }
+  .booking-thumb { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+  .booking-info { flex: 1; }
+  .booking-name { color: var(--cream); font-size: 14px; font-weight: 600; font-family: -apple-system, sans-serif; margin-bottom: 3px; }
+  .booking-date { color: var(--text-muted); font-size: 12px; font-family: -apple-system, sans-serif; }
+  .booking-status { font-size: 11px; font-family: -apple-system, sans-serif; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+  .status-confirmed { background: rgba(200,169,110,0.15); color: var(--gold); }
+  .status-pending { background: rgba(200,150,50,0.15); color: #E8A840; }
+  .status-completed { background: rgba(100,100,100,0.2); color: var(--text-muted); }
+
+  /* ===================== SCREEN 11: PROFILE ===================== */
+  #profile { }
+  .profile-hero { padding: 20px 20px 0; display: flex; align-items: center; gap: 16px; }
+  .profile-avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold); }
+  .profile-name { color: var(--cream); font-size: 20px; margin-bottom: 2px; }
+  .profile-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(200,169,110,0.15); border: 1px solid rgba(200,169,110,0.4); border-radius: 20px; padding: 4px 12px; }
+  .badge-text { color: var(--gold); font-size: 11px; letter-spacing: 1px; font-family: -apple-system, sans-serif; }
+  .prefs-section { padding: 20px; }
+  .pref-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(200,169,110,0.1); }
+  .pref-item::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  .pref-icon { font-size: 18px; width: 28px; text-align: center; }
+  .pref-text { color: var(--ivory); font-size: 14px; font-family: -apple-system, sans-serif; }
+  .profile-actions { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
+
+  /* ===================== VENDOR SCREENS ===================== */
+  #vendor-login {
+    background: linear-gradient(180deg, #2C1A0E 0%, #1A0F06 100%);
+    justify-content: space-between;
+    padding: 0 28px 40px;
+  }
+  .vendor-badge { background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.3); border-radius: 20px; padding: 6px 16px; display: inline-block; margin-bottom: 8px; }
+  .vendor-badge-text { color: var(--gold); font-size: 11px; letter-spacing: 2px; font-family: -apple-system, sans-serif; }
+
+  #vendor-dashboard { }
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 0 16px; }
+  .stat-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(200,169,110,0.15); border-radius: 12px; padding: 12px 10px; text-align: center; }
+  .stat-num { color: var(--gold); font-size: 22px; font-weight: 700; font-family: -apple-system, sans-serif; }
+  .stat-label { color: var(--text-muted); font-size: 10px; font-family: -apple-system, sans-serif; margin-top: 2px; line-height: 1.3; }
+
+  #vendor-services { }
+  .vendor-svc-list { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
+  .vendor-svc-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(200,169,110,0.15); border-radius: 12px; padding: 12px 14px; display: flex; gap: 12px; align-items: center; }
+  .vendor-svc-thumb { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+  .vendor-svc-info { flex: 1; }
+  .vendor-svc-name { color: var(--cream); font-size: 14px; font-family: -apple-system, sans-serif; font-weight: 600; }
+  .vendor-svc-cat { color: var(--text-muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .svc-active { background: rgba(200,169,110,0.15); color: var(--gold); font-size: 10px; padding: 3px 8px; border-radius: 10px; font-family: -apple-system, sans-serif; }
+
+  #add-service { }
+  .add-form { padding: 0 20px; display: flex; flex-direction: column; gap: 16px; }
+  .category-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill { background: rgba(255,255,255,0.06); border: 1px solid rgba(200,169,110,0.2); border-radius: 20px; padding: 7px 14px; color: var(--text-muted); font-size: 12px; cursor: pointer; font-family: -apple-system, sans-serif; }
+  .pill.selected { background: rgba(200,169,110,0.2); border-color: var(--gold); color: var(--gold); }
+
+  #vendor-reservations { }
+  .res-list { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
+  .res-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(200,169,110,0.15); border-radius: 12px; padding: 14px 16px; cursor: pointer; }
+  .res-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .res-service { color: var(--cream); font-size: 14px; font-weight: 600; font-family: -apple-system, sans-serif; }
+  .res-new { background: rgba(200,169,110,0.2); color: var(--gold); font-size: 10px; padding: 3px 10px; border-radius: 10px; font-family: -apple-system, sans-serif; font-weight: 700; }
+  .res-client { color: var(--text-muted); font-size: 12px; font-family: -apple-system, sans-serif; }
+  .res-bottom { display: flex; justify-content: space-between; align-items: center; }
+  .res-datetime { color: var(--ivory); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .res-amount { color: var(--gold); font-size: 15px; font-weight: 700; font-family: -apple-system, sans-serif; }
+
+  #reservation-detail { }
+  .res-detail-body { padding: 20px; }
+  .res-detail-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(200,169,110,0.2); border-radius: 14px; padding: 16px; margin-bottom: 20px; }
+  .res-detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(200,169,110,0.1); }
+  .res-detail-row:last-child { border-bottom: none; }
+  .res-detail-key { color: var(--text-muted); font-size: 13px; font-family: -apple-system, sans-serif; }
+  .res-detail-val { color: var(--cream); font-size: 13px; font-weight: 600; font-family: -apple-system, sans-serif; text-align: right; max-width: 60%; }
+  .res-amount-big { color: var(--gold); font-size: 32px; font-weight: 700; font-family: -apple-system, sans-serif; text-align: center; margin: 16px 0 4px; }
+  .res-amount-label { color: var(--text-muted); font-size: 12px; text-align: center; font-family: -apple-system, sans-serif; margin-bottom: 20px; }
+  .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn-confirm { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: var(--bg-dark); border: none; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: -apple-system, sans-serif; }
+  .btn-decline { background: transparent; color: #C87070; border: 1px solid #C87070; border-radius: 12px; padding: 14px; font-size: 14px; cursor: pointer; font-family: -apple-system, sans-serif; }
+
+  /* Push notification */
+  .push-notif {
+    position: absolute;
+    top: 60px; left: 16px; right: 16px;
+    background: rgba(44,26,14,0.97);
+    border: 1px solid rgba(200,169,110,0.5);
+    border-radius: 16px;
+    padding: 14px 16px;
+    z-index: 100;
+    display: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+  }
+  .push-notif.show { display: flex; gap: 12px; align-items: flex-start; }
+  .push-icon { font-size: 28px; flex-shrink: 0; }
+  .push-app { color: var(--gold); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; font-family: -apple-system, sans-serif; margin-bottom: 2px; }
+  .push-title { color: var(--cream); font-size: 14px; font-weight: 700; font-family: -apple-system, sans-serif; margin-bottom: 2px; }
+  .push-body { color: var(--text-muted); font-size: 12px; font-family: -apple-system, sans-serif; }
+
+  /* Velvet Room screen */
+  #velvet-room {
+    background: linear-gradient(160deg, #3D1A1A 0%, #2C1A0E 50%, #1A0F06 100%);
+    justify-content: space-between;
+    padding: 0 24px 40px;
+  }
+  .velvet-content { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px 0; }
+  .velvet-emblem { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #5A1A6A, #3D1040); border: 1px solid rgba(212,168,232,0.4); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+  .velvet-emblem-inner { width: 28px; height: 28px; border-radius: 50%; background: rgba(212,168,232,0.15); border: 1px solid rgba(212,168,232,0.5); }
+  .velvet-heading { color: var(--cream); font-size: 26px; letter-spacing: 4px; margin-bottom: 12px; }
+  .velvet-desc { color: var(--ivory); font-size: 14px; line-height: 1.8; font-family: -apple-system, sans-serif; margin-bottom: 32px; }
+  .velvet-items { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  .velvet-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(200,169,110,0.2); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+  .velvet-item-icon { font-size: 20px; }
+  .velvet-item-text { color: var(--ivory); font-size: 14px; font-family: -apple-system, sans-serif; }
+
+  /* Page header with back */
+  .page-header {
+    padding: 8px 20px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .back-btn { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--cream); font-size: 18px; flex-shrink: 0; border: none; }
+  .page-header-title { color: var(--cream); font-size: 18px; }
+
+  /* Search bar */
+  .search-bar { margin: 0 16px 16px; background: rgba(255,255,255,0.06); border: 1px solid rgba(200,169,110,0.2); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+  .search-icon { color: var(--text-muted); font-size: 16px; }
+  .search-input { background: none; border: none; color: var(--cream); font-size: 14px; outline: none; flex: 1; font-family: -apple-system, sans-serif; }
+  .search-input::placeholder { color: var(--text-muted); }
+
+  /* Filter tabs */
+  .filter-tabs { display: flex; gap: 8px; padding: 0 16px 14px; overflow-x: auto; }
+  .filter-tabs::-webkit-scrollbar { display: none; }
+  .filter-tab { background: rgba(255,255,255,0.06); border: 1px solid rgba(200,169,110,0.2); border-radius: 20px; padding: 7px 14px; color: var(--text-muted); font-size: 12px; cursor: pointer; white-space: nowrap; font-family: -apple-system, sans-serif; flex-shrink: 0; }
+  .filter-tab.active { background: rgba(200,169,110,0.2); border-color: var(--gold); color: var(--gold); }
+
+  /* Add button */
+  .add-btn { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: var(--bg-dark); border: none; border-radius: 12px; padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: -apple-system, sans-serif; }
+
+  .encrypt-badge { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; }
+  .encrypt-text { color: var(--text-muted); font-size: 11px; font-family: -apple-system, sans-serif; letter-spacing: 0.5px; }
+
+  /* ===================== FLOATING MIC BUTTON ===================== */
+  .float-mic {
+    position: absolute;
+    bottom: 88px;
+    right: 18px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(200,169,110,0.25), rgba(200,169,110,0.1));
+    border: 1px solid rgba(200,169,110,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 50;
+    box-shadow: 0 0 16px rgba(200,169,110,0.15);
+    animation: mic-pulse 3s ease-in-out infinite;
+  }
+  @keyframes mic-pulse {
+    0%, 100% { box-shadow: 0 0 16px rgba(200,169,110,0.15); }
+    50% { box-shadow: 0 0 24px rgba(200,169,110,0.35); }
+  }
+
+  /* ===================== VERTICAL SERVICE CAROUSEL ===================== */
+  #svc-v-carousel {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+  }
+  #svc-v-track {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 16px;
+    transition: transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94);
+    will-change: transform;
+    width: 100%;
+  }
+  .svc-v-card {
+    flex-shrink: 0;
+    width: 100%;
+    height: 130px;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.55s ease;
+  }
+  .svc-v-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .svc-v-card.svc-center { transform: scale(1); opacity: 1; }
+  .svc-v-card.svc-center2 { transform: scale(1); opacity: 0.92; }
+  .svc-v-card.svc-side { transform: scale(0.80); opacity: 0.55; }
+  .svc-v-card.svc-far { transform: scale(0.65); opacity: 0.25; }
+  .svc-v-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent 45%, rgba(26,15,6,0.88));
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 12px 14px;
+  }
+  .svc-v-name {
+    color: var(--cream);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: -apple-system, sans-serif;
+    letter-spacing: 0.3px;
+  }
+
+  /* ===================== PLAN MY NIGHT BANNER ===================== */
+  .plan-night-banner {
+    margin: 8px 20px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(200,169,110,0.25);
+    border-radius: 14px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .plan-night-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(200,169,110,0.08), transparent);
+    animation: shimmer 4s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 200%; }
+  }
+  .plan-night-left { display: flex; flex-direction: column; gap: 3px; }
+  .plan-night-label { color: var(--gold); font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; font-family: -apple-system, sans-serif; }
+  .plan-night-title { color: var(--cream); font-size: 21px; font-weight: 600; letter-spacing: 0.5px; }
+  .plan-night-sub { color: var(--text-muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .plan-night-arrow { color: var(--gold); font-size: 22px; }
+
+  /* ===================== PLAN MY NIGHT SCREEN ===================== */
+  #plan-my-night { }
+  .night-intro { padding: 8px 20px 20px; }
+  .night-intro-title { color: var(--cream); font-size: 22px; margin-bottom: 6px; }
+  .night-intro-sub { color: var(--text-muted); font-size: 13px; font-family: -apple-system, sans-serif; line-height: 1.5; }
+  .night-levels { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+  .night-level-card {
+    border-radius: 16px;
+    padding: 18px 20px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(200,169,110,0.2);
+  }
+  .night-level-card.ritual { background: linear-gradient(135deg, #3D2410, #2C1A0E); }
+  .night-level-card.elevation { background: linear-gradient(135deg, #2C1A3A, #1A0F20); border-color: rgba(160,120,200,0.3); }
+  .night-level-card.untamed { background: linear-gradient(135deg, #3A1A10, #2A0F08); border-color: rgba(200,100,60,0.3); }
+  .night-level-card.carte-blanche { background: linear-gradient(135deg, #1A1A0A, #0F0F06); border: 1px solid rgba(200,169,110,0.6); }
+  .night-level-name { font-size: 18px; letter-spacing: 2px; margin-bottom: 4px; }
+  .night-level-card.ritual .night-level-name { color: var(--cream); }
+  .night-level-card.elevation .night-level-name { color: #C8A8E8; }
+  .night-level-card.untamed .night-level-name { color: #E8A878; }
+  .night-level-card.carte-blanche .night-level-name { color: var(--gold); }
+  .night-level-desc { color: var(--text-muted); font-size: 12px; font-family: -apple-system, sans-serif; line-height: 1.5; margin-bottom: 10px; }
+  .night-level-price { font-size: 11px; font-family: -apple-system, sans-serif; letter-spacing: 1px; }
+  .night-level-card.ritual .night-level-price { color: rgba(200,169,110,0.6); }
+  .night-level-card.elevation .night-level-price { color: rgba(200,168,232,0.6); }
+  .night-level-card.untamed .night-level-price { color: rgba(232,168,120,0.6); }
+  .night-level-card.carte-blanche .night-level-price { color: var(--gold); }
+  .night-level-arrow { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 20px; opacity: 0.5; }
+
+  /* ===================== NIGHT TIMELINE SCREEN ===================== */
+  #night-timeline { }
+  .timeline-header { padding: 8px 20px 16px; }
+  .timeline-level-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.3); border-radius: 20px; padding: 6px 14px; margin-bottom: 10px; }
+  .timeline-level-text { color: var(--gold); font-size: 11px; letter-spacing: 2px; font-family: -apple-system, sans-serif; }
+  .timeline-title { color: var(--cream); font-size: 20px; margin-bottom: 4px; }
+  .timeline-sub { color: var(--text-muted); font-size: 12px; font-family: -apple-system, sans-serif; }
+  .timeline-list { padding: 0 20px; display: flex; flex-direction: column; }
+  .timeline-item { display: flex; gap: 16px; padding-bottom: 20px; position: relative; }
+  .timeline-item:not(:last-child)::after { content: ''; position: absolute; left: 19px; top: 40px; bottom: 0; width: 1px; background: rgba(200,169,110,0.2); }
+  .timeline-dot { width: 38px; height: 38px; border-radius: 50%; background: rgba(200,169,110,0.12); border: 1px solid rgba(200,169,110,0.4); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .timeline-dot-text { color: var(--gold); font-size: 9px; font-family: -apple-system, sans-serif; font-weight: 700; text-align: center; line-height: 1.2; }
+  .timeline-content { flex: 1; padding-top: 4px; }
+  .timeline-time { color: var(--gold); font-size: 11px; letter-spacing: 1px; font-family: -apple-system, sans-serif; margin-bottom: 2px; }
+  .timeline-venue { color: var(--cream); font-size: 15px; margin-bottom: 3px; }
+  .timeline-detail { color: var(--text-muted); font-size: 12px; font-family: -apple-system, sans-serif; line-height: 1.4; }
+  .timeline-tag { display: inline-block; background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.2); border-radius: 10px; padding: 2px 8px; color: var(--gold); font-size: 10px; font-family: -apple-system, sans-serif; margin-top: 4px; }
+  .faceid-confirm-box { margin: 0 20px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(200,169,110,0.25); border-radius: 16px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; }
+  .faceid-confirm-icon { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .faceid-confirm-text { flex: 1; }
+  .faceid-confirm-label { color: var(--gold); font-size: 11px; letter-spacing: 1.5px; font-family: -apple-system, sans-serif; margin-bottom: 3px; }
+  .faceid-confirm-sub { color: var(--text-muted); font-size: 11px; font-family: -apple-system, sans-serif; line-height: 1.4; }
+
+  /* ===================== HOST A NIGHT SCREEN ===================== */
+  #host-a-night { }
+  .host-hero { height: 280px; position: relative; flex-shrink: 0; }
+  .host-hero img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+  .host-hero-overlay { position: absolute; inset: 0; background: linear-gradient(transparent 45%, rgba(44,26,14,0.7) 70%, rgba(44,26,14,0.98) 100%); }
+  .host-hero-badge { position: absolute; bottom: 16px; left: 20px; }
+  .host-name { color: var(--cream); font-size: 22px; margin-bottom: 2px; }
+  .host-title-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(200,169,110,0.15); border: 1px solid rgba(200,169,110,0.4); border-radius: 20px; padding: 4px 12px; }
+  .host-title-text { color: var(--gold); font-size: 10px; letter-spacing: 2px; font-family: -apple-system, sans-serif; }
+  .host-body { padding: 16px 20px; flex: 1; overflow-y: auto; }
+  .host-desc { color: var(--ivory); font-size: 14px; font-family: -apple-system, sans-serif; line-height: 1.7; margin-bottom: 20px; }
+  .host-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .host-feature { display: flex; align-items: flex-start; gap: 12px; }
+  .host-feature-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; margin-top: 6px; }
+  .host-feature-text { color: var(--ivory); font-size: 13px; font-family: -apple-system, sans-serif; line-height: 1.5; }
+  .host-rate-box { background: rgba(200,169,110,0.08); border: 1px solid rgba(200,169,110,0.25); border-radius: 14px; padding: 14px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+  .host-rate-label { color: var(--text-muted); font-size: 11px; font-family: -apple-system, sans-serif; }
+  .host-rate-value { color: var(--gold); font-size: 18px; font-weight: 700; font-family: -apple-system, sans-serif; }
+</style>
+</head>
+<body>
+
+<div class="phone-shell">
+
+  <!-- ==================== SPLASH ==================== -->
+  <div class="screen active" id="splash">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;">
+      <img src="/hok_assets/hok_logo_light.png" class="splash-logo" alt="HOK">
+      <div class="splash-brand">Haus of Katherine</div>
+      <div class="splash-tagline" style="letter-spacing:5px;font-size:12px;">DISCERNMENT ONLY</div>
+    </div>
+    <div style="padding:0 32px 48px;display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="cursor:pointer;animation:bounce-arrow 2s ease-in-out infinite;" onclick="showScreen('onboard1')">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+          <circle cx="22" cy="22" r="21" stroke="rgba(200,169,110,0.3)" stroke-width="1"/>
+          <circle cx="22" cy="22" r="21" stroke="url(#gold-ring)" stroke-width="1" stroke-dasharray="132" stroke-dashoffset="33"/>
+          <defs>
+            <linearGradient id="gold-ring" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="rgba(200,169,110,0)"/>
+              <stop offset="50%" stop-color="rgba(226,201,138,0.9)"/>
+              <stop offset="100%" stop-color="rgba(200,169,110,0)"/>
+            </linearGradient>
+          </defs>
+          <line x1="22" y1="14" x2="22" y2="30" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"/>
+          <polyline points="16 24 22 30 28 24" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <style>
+  @keyframes bounce-arrow {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(6px); opacity: 0.7; }
+  }
+  </style>
+
+  <!-- ==================== ONBOARDING 1 ==================== -->
+  <div class="screen" id="onboard1">
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+      <div style="margin-bottom:12px;">
+        <span class="screen-title">Welcome</span>
+      </div>
+      <h1 class="heading-xl" style="margin-bottom:16px;">Access.<br>Discretion.<br>Reward.</h1>
+      <div class="gold-line" style="margin-bottom:20px;"></div>
+      <p class="body-text" style="color:var(--ivory);">A private membership for those who expect more from life in South Florida.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;justify-content:center;gap:8px;margin-bottom:16px;">
+        <div style="width:24px;height:3px;background:var(--gold);border-radius:2px;"></div>
+        <div style="width:8px;height:3px;background:rgba(200,169,110,0.3);border-radius:2px;"></div>
+      </div>
+      <button class="btn-gold" onclick="showScreen('onboard2')">Next</button>
+    </div>
+  </div>
+
+  <!-- ==================== ONBOARDING 2 ==================== -->
+  <div class="screen" id="onboard2">
+    <img src="/hok_assets/services/yachting.jpg" class="bg-img" alt="">
+    <div class="overlay"></div>
+    <div class="content">
+      <div style="margin-bottom:12px;"><span class="screen-title">Your Life, Curated</span></div>
+      <h2 class="heading-lg" style="margin-bottom:12px;">From dining to travel — everything handled.</h2>
+      <p class="body-text" style="margin-bottom:32px;color:var(--ivory);">Fine dining, private jets, yachts, wellness, events — one call, one relationship.</p>
+      <div style="display:flex;justify-content:center;gap:8px;margin-bottom:20px;">
+        <div style="width:8px;height:3px;background:rgba(200,169,110,0.3);border-radius:2px;"></div>
+        <div style="width:24px;height:3px;background:var(--gold);border-radius:2px;"></div>
+      </div>
+      <button class="btn-gold" onclick="showScreen('faceid')">Continue</button>
+    </div>
+  </div>
+
+  <!-- ==================== FACE ID ==================== -->
+  <div class="screen" id="faceid">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div style="padding:20px 32px 0;text-align:center;">
+      <img src="/hok_assets/hok_logo.webp" style="width:48px;height:48px;object-fit:contain;margin-bottom:8px;" alt="HOK">
+      <div style="color:var(--text-muted);font-size:13px;font-family:-apple-system,sans-serif;margin-bottom:4px;">Welcome back,</div>
+      <div style="color:var(--cream);font-size:22px;margin-bottom:2px;">Alfred</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;">
+      <div class="faceid-circle" onclick="showScreen('home')">
+        <div class="faceid-icon"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4"/><path d="M15 3h4a2 2 0 012 2v4"/><path d="M9 21H5a2 2 0 01-2-2v-4"/><path d="M15 21h4a2 2 0 002-2v-4"/><circle cx="12" cy="10" r="3"/><path d="M9 16c0-1.7 1.3-3 3-3s3 1.3 3 3"/></svg></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="color:var(--cream);font-size:15px;font-family:-apple-system,sans-serif;margin-bottom:6px;">Face ID Verification</div>
+        <div style="color:var(--text-muted);font-size:12px;font-family:-apple-system,sans-serif;">Tap to authenticate</div>
+      </div>
+    </div>
+    <div style="padding:0 32px 16px;display:flex;flex-direction:column;gap:12px;">
+      <div class="encrypt-badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <span class="encrypt-text">Biometric secured · AES-256 encrypted</span>
+      </div>
+      <div style="text-align:center;margin-top:8px;">
+        <button class="btn-ghost" onclick="showScreen('home')">Use Password Instead</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== HOME ==================== -->
+  <div class="screen" id="home">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="scroll-content">
+      <div class="home-header">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+          <div>
+            <div class="greeting">Good evening,</div>
+            <div class="greeting-name">Alfred Fincher</div>
+          </div>
+          <img src="/hok_assets/finch.jpg" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);" alt="Alfred">
+        </div>
+        <div class="gold-line"></div>
+      </div>
+
+      <div class="section-header">
+        <span class="section-title">Featured Today</span>
+        <span class="section-see-all" onclick="showScreen('services')">See All</span>
+      </div>
+      <div class="featured-scroll" style="padding-bottom:4px;">
+        <div class="featured-card" onclick="showScreen('service-detail')">
+          <img src="/hok_assets/services/fine_dining.jpg" alt="Fine Dining">
+          <div class="fc-overlay"><div class="fc-name">Carbone Miami</div><div class="fc-tag">Fine Dining</div></div>
+        </div>
+        <div class="featured-card" onclick="showScreen('service-detail')">
+          <img src="/hok_assets/services/yachting.jpg" alt="Yachting">
+          <div class="fc-overlay"><div class="fc-name">80ft Azimut Charter</div><div class="fc-tag">Yachting</div></div>
+        </div>
+        <div class="featured-card" onclick="showScreen('service-detail')">
+          <img src="/hok_assets/services/private_events.jpg" alt="Events">
+          <div class="fc-overlay"><div class="fc-name">Members Gala</div><div class="fc-tag">Private Event</div></div>
+        </div>
+      </div>
+
+      <div class="section-header" style="margin-top:8px;">
+        <span class="section-title">Your Concierge</span>
+      </div>
+      <div class="concierge-bar">
+        <img src="/hok_assets/katherine.jpg" class="concierge-avatar" alt="Katherine">
+        <div class="concierge-info">
+          <div class="concierge-name">Katherine</div>
+          <div class="concierge-status">● Available now</div>
+        </div>
+        <button class="concierge-btn" onclick="showScreen('personal-concierge')">Reach Katherine</button>
+      </div>
+
+      <!-- PLAN MY NIGHT BANNER -->
+      <div class="plan-night-banner" onclick="showScreen('plan-my-night')">
+        <div class="plan-night-left">
+          <div class="plan-night-title">Plan My Night</div>
+          <div class="plan-night-sub" style="color:var(--gold);font-style:italic;">Desired. Delivered.</div>
+        </div>
+        <div class="plan-night-arrow">›</div>
+      </div>
+
+      <!-- WEATHER BLOCK -->
+      <div style="margin:12px 20px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(200,169,110,0.15);border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:32px;height:32px;flex-shrink:0;"><svg viewBox="0 0 24 24" fill="none" stroke="#C8A96E" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/></svg></div>
+          <div>
+            <div style="color:var(--cream);font-size:18px;font-weight:600;font-family:-apple-system,sans-serif;">84°F</div>
+            <div style="color:var(--text-muted);font-size:11px;font-family:-apple-system,sans-serif;letter-spacing:0.5px;">MIAMI · CLEAR</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="color:var(--ivory);font-size:12px;font-family:-apple-system,sans-serif;">Perfect evening</div>
+          <div style="color:var(--text-muted);font-size:11px;font-family:-apple-system,sans-serif;">for outdoor dining</div>
+        </div>
+      </div>
+
+      <!-- NEWS BLOCK -->
+      <div class="section-header">
+        <span class="section-title">Curated for You</span>
+      </div>
+      <div style="padding:0 20px 24px;display:flex;flex-direction:column;gap:10px;">
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(200,169,110,0.12);border-radius:12px;padding:12px 14px;cursor:pointer;">
+          <div style="color:var(--gold);font-size:10px;letter-spacing:1.5px;font-family:-apple-system,sans-serif;margin-bottom:4px;">Dining</div>
+          <div style="color:var(--cream);font-size:13px;font-family:-apple-system,sans-serif;line-height:1.4;">KIKI Restaurant launches an exclusive new wine list — 40 labels, private cellar access for HOK members.</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(200,169,110,0.12);border-radius:12px;padding:12px 14px;cursor:pointer;">
+          <div style="color:var(--gold);font-size:10px;letter-spacing:1.5px;font-family:-apple-system,sans-serif;margin-bottom:4px;">Private Event</div>
+          <div style="color:var(--cream);font-size:13px;font-family:-apple-system,sans-serif;line-height:1.4;">Members-only rooftop evening at 1 Hotel South Beach — limited to 30 guests. August 12.
+        </div>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item active" onclick="showScreen('home')"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></div><div class="nav-label">Home</div></div>
+      <div class="nav-item" onclick="showScreen('services')"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg></div><div class="nav-label">Services</div></div>
+      <div class="nav-item nav-mic-center" style="padding:0 8px;"><div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,rgba(200,169,110,0.3),rgba(200,169,110,0.1));border:1.5px solid rgba(200,169,110,0.7);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(200,169,110,0.2);margin-bottom:4px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0014 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></div></div>
+      <div class="nav-item" onclick="showScreen('my-bookings')"><div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div><div class="nav-label">Bookings</div></div>
+      <div class="nav-item" onclick="showScreen('profile')"><div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div><div class="nav-label">Profile</div></div>
+    </div>
+  </div>
+
+  <!-- ==================== SERVICES ==================== -->
+  <div class="screen" id="services">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="page-header">
+      <div style="flex:1;">
+        <div class="screen-title">Curated for Alfred</div>
+        <div class="heading-md">Your Services</div>
+      </div>
+    </div>
+    <div class="scroll-content" style="overflow:hidden;">
+      <!-- VERTICAL 3D CAROUSEL -->
+      <div id="svc-v-carousel" style="flex:1;position:relative;overflow:hidden;padding:8px 0;">
+        <div id="svc-v-track" style="display:flex;flex-direction:column;gap:10px;padding:0 16px;transition:transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94);will-change:transform;">
+          <div class="svc-v-card" onclick="showScreen('service-detail')">
+            <img src="/hok_assets/services/fine_dining.jpg" alt="Fine Dining">
+            <div class="svc-v-overlay"><div class="svc-v-name">Fine Dining</div></div>
+          </div>
+          <div class="svc-v-card" onclick="showScreen('service-detail')">
+            <img src="/hok_assets/services/yachting.jpg" alt="Yachting">
+            <div class="svc-v-overlay"><div class="svc-v-name">Yachting</div></div>
+          </div>
+          <div class="svc-v-card" onclick="showScreen('service-detail')">
+            <img src="/hok_assets/services/spa_wellness.jpg" alt="Spa">
+            <div class="svc-v-overlay"><div class="svc-v-name">Spa & Wellness</div></div>
+          </div>
+          <div class="svc-v-card" onclick="showScreen('service-detail')">
+            <img src="/hok_assets/services/exotic_cars.jpg" alt="Exotic Cars">
+            <div class="svc-v-overlay"><div class="svc-v-name">Exotic Cars</div></div>
+          </div>
+          <div class="svc-v-card" onclick="showScreen('service-detail')">
+            <img src="/hok_assets/services/private_jet.jpg" alt="Private Jet">
+            <div class="svc-v-overlay"><div class="svc-v-name">Private Jet</div></div>
+          </div>
+          <div class="svc-v-card" onclick="showScreen('service-detail')">
+            <img src="/hok_assets/services/limousine.jpg" alt="Limousine">
+            <div class="svc-v-overlay"><div class="svc-v-name">Limousine</div></div>
+          </div>
+          <div class="svc-v-card" onclick="showScreen('service-detail')">
+            <img src="/hok_assets/services/private_events.jpg" alt="Events">
+            <div class="svc-v-overlay"><div class="svc-v-name">Private Events</div></div>
+          </div>
+          <div class="svc-v-card" onclick="showScreen('service-detail')">
+            <img src="/hok_assets/services/nightlife.jpg" alt="Nightlife">
+            <div class="svc-v-overlay"><div class="svc-v-name">Members Events</div></div>
+          </div>
+          <div class="svc-v-card" onclick="showScreen('service-detail')">
+            <img src="/hok_assets/services/hospitality.jpg" alt="Hospitality">
+            <div class="svc-v-overlay"><div class="svc-v-name">Hospitality</div></div>
+          </div>
+          <div class="svc-v-card" onclick="showScreen('service-detail')">
+            <img src="/hok_assets/services/legal_advisory.jpg" alt="Legal Advisory">
+            <div class="svc-v-overlay"><div class="svc-v-name">Legal Advisory</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- VELVET ROOM STATIC FOOTER -->
+    <div class="velvet-card" style="margin:0 16px 8px;flex-shrink:0;" onclick="showScreen('velvet-room')">
+      <div>
+        <div class="velvet-title">Velvet Room</div>
+        <div class="velvet-sub">Private requests · By arrangement</div>
+      </div>
+      <div class="velvet-arrow">›</div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="showScreen('home')"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></div><div class="nav-label">Home</div></div>
+      <div class="nav-item active" onclick="showScreen('services')"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg></div><div class="nav-label">Services</div></div>
+      <div class="nav-item nav-mic-center" style="padding:0 8px;"><div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,rgba(200,169,110,0.3),rgba(200,169,110,0.1));border:1.5px solid rgba(200,169,110,0.7);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(200,169,110,0.2);margin-bottom:4px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0014 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></div></div>
+      <div class="nav-item" onclick="showScreen('my-bookings')"><div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div><div class="nav-label">Bookings</div></div>
+      <div class="nav-item" onclick="showScreen('profile')"><div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div><div class="nav-label">Profile</div></div>
+    </div>
+  </div>
+
+  <!-- ==================== SERVICE DETAIL ==================== -->
+  <div class="screen" id="service-detail">
+    <div class="status-bar" style="position:absolute;top:0;left:0;right:0;z-index:5;">
+      <span class="status-time" style="color:white;">9:41</span>
+      <span class="status-icons" style="color:white;">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="white" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="detail-hero">
+      <img src="/hok_assets/services/fine_dining.jpg" alt="Fine Dining">
+      <div class="detail-hero-overlay"></div>
+      <div class="detail-back" onclick="showScreen('services')">‹</div>
+    </div>
+    <div class="scroll-content">
+      <div class="detail-body">
+        <div class="detail-title">Carbone Miami</div>
+        <div class="detail-category">Fine Dining · Brickell</div>
+        <div class="detail-rating">
+          <span class="stars">★★★★★</span>
+          <span class="rating-text">HOK Trusted Source · 4.9</span>
+        </div>
+        <p class="detail-desc">One of Miami's most sought-after tables. Carbone brings Italian-American classics to life in an atmosphere of effortless glamour. Through HOK, your table is reserved before you ask.</p>
+        <div class="hok-recommends">
+          <div class="hok-rec-label">Why HOK Recommends This</div>
+          <div class="hok-rec-text">We have a direct relationship with the management team. Preferred seating, private dining room availability, and sommelier introductions are available to HOK members.</div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-footer">
+      <button class="btn-gold" onclick="showScreen('booking')">Request Reservation</button>
+    </div>
+  </div>
+
+  <!-- ==================== BOOKING FORM ==================== -->
+  <div class="screen" id="booking">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="page-header">
+      <button class="back-btn" onclick="showScreen('service-detail')">‹</button>
+      <div class="page-header-title">Request Reservation</div>
+    </div>
+    <div class="scroll-content">
+      <div style="padding:0 20px 16px;">
+        <div style="background:rgba(200,169,110,0.08);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+          <span style="display:flex;align-items:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C8A96E" stroke-width="1.5" stroke-linecap="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6h3.5a1.5 1.5 0 011.5 1.5v.5"/><path d="M18 21v-4"/></svg></span>
+          <div>
+            <div style="color:var(--cream);font-size:14px;font-weight:600;font-family:-apple-system,sans-serif;">Carbone Miami</div>
+            <div style="color:var(--text-muted);font-size:12px;font-family:-apple-system,sans-serif;">Fine Dining · Brickell</div>
+          </div>
+        </div>
+      </div>
+      <div class="booking-form">
+        <div>
+          <label class="input-label">Date</label>
+          <input class="input-field" type="text" value="August 25, 2026" readonly>
+        </div>
+        <div class="form-row">
+          <div>
+            <label class="input-label">Time</label>
+            <input class="input-field" type="text" value="8:00 PM" readonly>
+          </div>
+          <div>
+            <label class="input-label">Guests</label>
+            <input class="input-field" type="text" value="2">
+          </div>
+        </div>
+        <div>
+          <label class="input-label">Special Requests</label>
+          <input class="input-field" type="text" placeholder="Dietary needs, occasion...">
+        </div>
+      </div>
+      <div style="height:16px;"></div>
+      <div class="booking-note">
+        <div class="booking-note-text">Your concierge will confirm this reservation within 2 hours. Preferred seating is arranged on your behalf.</div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+    <div class="booking-footer">
+      <button class="btn-gold" onclick="showScreen('confirmation')">Confirm Request</button>
+    </div>
+  </div>
+
+  <!-- ==================== CONFIRMATION ==================== -->
+  <div class="screen" id="confirmation">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 32px;">
+      <div class="confirm-icon">✓</div>
+      <div class="confirm-title">Request Received</div>
+      <p class="confirm-sub">Your concierge has been notified and will confirm your reservation within 2 hours.</p>
+      <div class="confirm-detail-card">
+        <div class="confirm-row"><span class="confirm-key">Venue</span><span class="confirm-val">Carbone Miami</span></div>
+        <div class="confirm-row"><span class="confirm-key">Date</span><span class="confirm-val">August 25, 2026</span></div>
+        <div class="confirm-row"><span class="confirm-key">Time</span><span class="confirm-val">8:00 PM</span></div>
+        <div class="confirm-row"><span class="confirm-key">Guests</span><span class="confirm-val">2</span></div>
+        <div class="confirm-row"><span class="confirm-key">Status</span><span class="confirm-val" style="color:var(--gold);">Pending Confirmation</span></div>
+      </div>
+    </div>
+    <div style="padding:0 32px 40px;display:flex;flex-direction:column;gap:12px;">
+      <button class="btn-gold" onclick="showScreen('my-bookings')">View My Bookings</button>
+      <button class="btn-outline" onclick="showScreen('home')">Back to Home</button>
+    </div>
+  </div>
+
+  <!-- ==================== MY BOOKINGS ==================== -->
+  <div class="screen" id="my-bookings">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="page-header">
+      <div style="flex:1;">
+        <div class="screen-title">History</div>
+        <div class="heading-md">My Bookings</div>
+      </div>
+    </div>
+    <div class="filter-tabs">
+      <div class="filter-tab active">All</div>
+      <div class="filter-tab">Confirmed</div>
+      <div class="filter-tab">Pending</div>
+      <div class="filter-tab">Completed</div>
+    </div>
+    <div class="scroll-content">
+      <div class="bookings-list">
+        <div class="booking-item">
+          <img src="/hok_assets/services/fine_dining.jpg" class="booking-thumb" alt="">
+          <div class="booking-info">
+            <div class="booking-name">Carbone Miami</div>
+            <div class="booking-date">Aug 25, 2026 · 8:00 PM · 2 guests</div>
+          </div>
+          <span class="booking-status status-pending">Pending</span>
+        </div>
+        <div class="booking-item">
+          <img src="/hok_assets/services/yachting.jpg" class="booking-thumb" alt="">
+          <div class="booking-info">
+            <div class="booking-name">80ft Azimut Charter</div>
+            <div class="booking-date">Jul 28, 2026 · Full Day</div>
+          </div>
+          <span class="booking-status status-confirmed">Confirmed</span>
+        </div>
+        <div class="booking-item">
+          <img src="/hok_assets/services/spa_wellness.jpg" class="booking-thumb" alt="">
+          <div class="booking-info">
+            <div class="booking-name">Spa & Stone Therapy</div>
+            <div class="booking-date">Jul 20, 2026 · 2:00 PM</div>
+          </div>
+          <span class="booking-status status-completed">Completed</span>
+        </div>
+        <div class="booking-item">
+          <img src="/hok_assets/services/private_jet.jpg" class="booking-thumb" alt="">
+          <div class="booking-info">
+            <div class="booking-name">Private Jet · MIA-NYC</div>
+            <div class="booking-date">Jul 15, 2026 · 10:00 AM</div>
+          </div>
+          <span class="booking-status status-completed">Completed</span>
+        </div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="showScreen('home')"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></div><div class="nav-label">Home</div></div>
+      <div class="nav-item" onclick="showScreen('services')"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg></div><div class="nav-label">Services</div></div>
+      <div class="nav-item active" onclick="showScreen('my-bookings')"><div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div><div class="nav-label">Bookings</div></div>
+      <div class="nav-item" onclick="showScreen('profile')"><div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div><div class="nav-label">Profile</div></div>
+    </div>
+  </div>
+
+  <!-- ==================== PROFILE ==================== -->
+  <div class="screen" id="profile">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="scroll-content">
+      <div class="profile-hero">
+        <img src="/hok_assets/finch.jpg" class="profile-avatar" alt="Alfred">
+        <div>
+          <div class="profile-name">Alfred Fincher</div>
+          <div style="margin-top:6px;">
+            <div class="profile-badge"><span style="color:var(--gold);font-size:12px;">★</span><span class="badge-text">Founding Member</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:16px 20px 0;">
+        <div class="gold-line"></div>
+      </div>
+      <div class="prefs-section">
+        <div style="color:var(--gold);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-family:-apple-system,sans-serif;margin-bottom:12px;">My Preferences</div>
+        <div class="pref-item"><span class="pref-text">Fine Dining — Italian, Steakhouse</span></div>
+        <div class="pref-item"><span class="pref-text">Private Events & VIP Access</span></div>
+        <div class="pref-item"><span class="pref-text">Yachting & Water Sports</span></div>
+        <div class="pref-item"><span class="pref-text">Exotic Cars</span></div>
+        <div class="pref-item"><span class="pref-text">Wellness & Recovery</span></div>
+        <div class="pref-item"><span class="pref-text">Football & Sports Events</span></div>
+        <div class="pref-item" style="border-bottom:none;"><span class="pref-text">Travel — South Florida & Beyond</span></div>
+      </div>
+      <!-- YOUR BALANCE -->
+      <div style="margin:0 20px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(200,169,110,0.15);border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div>
+            <div style="color:var(--text-muted);font-size:10px;letter-spacing:2px;font-family:-apple-system,sans-serif;">YOUR BALANCE</div>
+            <div style="color:var(--cream);font-size:20px;font-weight:600;font-family:-apple-system,sans-serif;margin-top:2px;">$24,500</div>
+          </div>
+        </div>
+        <button style="background:transparent;border:1px solid rgba(200,169,110,0.5);border-radius:20px;padding:7px 16px;color:var(--gold);font-size:11px;letter-spacing:1px;font-family:-apple-system,sans-serif;cursor:pointer;">Add Funds</button>
+      </div>
+      <div class="profile-actions">
+        <button class="btn-outline">Edit Profile</button>
+        <button class="btn-gold">Contact My Concierge</button>
+      </div>
+      <div style="height:24px;"></div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="showScreen('home')"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></div><div class="nav-label">Home</div></div>
+      <div class="nav-item" onclick="showScreen('services')"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg></div><div class="nav-label">Services</div></div>
+      <div class="nav-item" onclick="showScreen('my-bookings')"><div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div><div class="nav-label">Bookings</div></div>
+      <div class="nav-item active" onclick="showScreen('profile')"><div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div><div class="nav-label">Profile</div></div>
+    </div>
+  </div>
+
+  <!-- ==================== VELVET ROOM ==================== -->
+  <div class="screen" id="velvet-room">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="page-header">
+      <button class="back-btn" onclick="showScreen('services')">‹</button>
+      <div class="page-header-title" style="color:var(--gold);letter-spacing:2px;">Velvet Room</div>
+    </div>
+    <div class="velvet-content">
+      <div class="velvet-emblem"><div class="velvet-emblem-inner"></div></div>
+      <div class="velvet-heading">Velvet Room</div>
+      <p class="velvet-desc">The finest experiences are never listed.</p>
+      <p class="velvet-desc" style="font-size:13px;margin-top:-20px;">Whatever matters to you, matters to us. We handle the rest, with complete discretion, and without question.</p>
+
+    </div>
+    <div style="padding:0 24px 16px;">
+      <button class="btn-gold" onclick="showScreen('personal-concierge')">Make a Private Request</button>
+    </div>
+  </div>
+
+  <!-- ==================== PERSONAL CONCIERGE ==================== -->
+  <div class="screen" id="personal-concierge">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="page-header">
+      <button class="back-btn" onclick="showScreen('velvet-room')">‹</button>
+      <div class="page-header-title" style="color:var(--gold);letter-spacing:1px;">Your Personal Concierge</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;padding:0 24px;">
+      <div style="text-align:center;padding:24px 0 20px;">
+        <img src="/hok_assets/katherine.jpg" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid rgba(212,168,232,0.5);margin-bottom:12px;" alt="Katherine">
+        <div style="color:var(--cream);font-size:18px;margin-bottom:4px;">Katherine</div>
+        <div style="color:rgba(212,168,232,0.8);font-size:11px;letter-spacing:2px;font-family:-apple-system,sans-serif;">PERSONAL CONCIERGE</div>
+        <div style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:rgba(212,168,232,0.08);border:1px solid rgba(212,168,232,0.25);border-radius:20px;padding:5px 14px;">
+          <div style="width:6px;height:6px;border-radius:50%;background:#7CFC00;"></div>
+          <span style="color:rgba(212,168,232,0.7);font-size:11px;font-family:-apple-system,sans-serif;">Available now</span>
+        </div>
+      </div>
+      <div style="background:rgba(212,168,232,0.05);border:1px solid rgba(212,168,232,0.15);border-radius:16px;padding:18px;margin-bottom:20px;">
+        <div style="color:rgba(212,168,232,0.5);font-size:10px;letter-spacing:2px;font-family:-apple-system,sans-serif;margin-bottom:8px;">A MESSAGE FROM KATHERINE</div>
+        <div style="color:var(--ivory);font-size:14px;font-family:-apple-system,sans-serif;line-height:1.7;font-style:italic;">"This space is yours alone. Share what you have in mind, and I will take care of everything — quietly, completely, and exactly as you wish."</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(212,168,232,0.15);border-radius:14px;padding:14px 16px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="color:rgba(212,168,232,0.5);font-size:10px;letter-spacing:2px;font-family:-apple-system,sans-serif;">YOUR REQUEST</div>
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(212,168,232,0.1);border:1px solid rgba(212,168,232,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(212,168,232,0.8)" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0014 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+          </div>
+        </div>
+        <textarea style="background:none;border:none;color:var(--ivory);font-size:14px;font-family:-apple-system,sans-serif;width:100%;resize:none;outline:none;min-height:80px;line-height:1.6;" placeholder="Describe what you have in mind..."></textarea>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:rgba(212,168,232,0.4);"></div>
+        <div style="color:var(--text-muted);font-size:11px;font-family:-apple-system,sans-serif;letter-spacing:0.5px;">Your request is seen only by your concierge</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:20px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(200,169,110,0.4)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <div style="color:rgba(200,169,110,0.4);font-size:10px;font-family:-apple-system,sans-serif;letter-spacing:0.8px;">AES-256 · End-to-end encrypted · Zero knowledge</div>
+      </div>
+    </div>
+    <div style="padding:0 24px 24px;">
+      <button class="btn-gold" style="background:linear-gradient(135deg,#7B3FA0,#5A1A6A);color:#F5ECD7;" onclick="showScreen('home')">Send to Katherine</button>
+    </div>
+  </div>
+
+  <!-- ==================== PLAN MY NIGHT ==================== -->
+  <div class="screen" id="plan-my-night">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="page-header">
+      <button class="back-btn" onclick="showScreen('home')">‹</button>
+      <div class="page-header-title">Plan My Night</div>
+    </div>
+    <div class="scroll-content">
+      <div class="night-intro">
+        <div class="night-intro-title">Choose your intensity.</div>
+        <div class="night-intro-sub">Every detail arranged. Every door open.</div>
+      </div>
+      <div class="night-levels">
+        <div class="night-level-card ritual" onclick="showScreen('night-timeline')">
+          <div class="night-level-name">The Ritual</div>
+          <div class="night-level-desc">Dinner at the right table, the right wine, the right company. An evening of effortless refinement.</div>
+          <div class="night-level-price">From —</div>
+          <div class="night-level-arrow">›</div>
+        </div>
+        <div class="night-level-card elevation" onclick="showScreen('night-timeline')">
+          <div class="night-level-name">The Elevation</div>
+          <div class="night-level-desc">VIP access, closed doors, curated company. The night moves at your pace, not the crowd's.</div>
+          <div class="night-level-price">From —</div>
+          <div class="night-level-arrow">›</div>
+        </div>
+        <div class="night-level-card untamed" onclick="showScreen('night-timeline')">
+          <div class="night-level-name">The Untamed</div>
+          <div class="night-level-desc">No ceiling. No schedule. No apologies.</div>
+          <div class="night-level-price">From —</div>
+          <div class="night-level-arrow">›</div>
+        </div>
+        <div class="night-level-card carte-blanche" onclick="showScreen('night-timeline')">
+          <div class="night-level-name">Carte Blanche</div>
+          <div class="night-level-desc">No brief. No boundaries. No trace. We compose the night, you inhabit it.</div>
+
+          <div class="night-level-arrow">›</div>
+        </div>
+        <div style="height:20px;"></div>
+      </div>
+    </div>
+    <!-- CENTERED VOICE COMMAND -->
+    <div style="display:flex;justify-content:center;padding:8px 0 16px;flex-shrink:0;">
+      <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,rgba(200,169,110,0.25),rgba(200,169,110,0.08));border:1.5px solid rgba(200,169,110,0.65);display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(200,169,110,0.18);cursor:pointer;animation:mic-pulse 2.5s ease-in-out infinite;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0014 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== NIGHT TIMELINE ==================== -->
+  <div class="screen" id="night-timeline">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="page-header">
+      <button class="back-btn" onclick="showScreen('plan-my-night')">‹</button>
+      <div class="page-header-title">Your Evening</div>
+    </div>
+    <div class="scroll-content">
+      <div class="timeline-header">
+        <div class="timeline-level-badge"><span class="timeline-level-text">THE UNTAMED</span></div>
+        <div class="timeline-title">Tonight's Programme</div>
+        <div class="timeline-sub">Curated for Alfred Fincher · August 25</div>
+      </div>
+      <div class="timeline-list">
+        <div class="timeline-item">
+          <div class="timeline-dot"><div class="timeline-dot-text">21:00</div></div>
+          <div class="timeline-content">
+            <div class="timeline-time">9:00 PM</div>
+            <div class="timeline-venue">Carbone Miami</div>
+            <div class="timeline-detail">Private dining room, preferred seating. Chef's tasting menu prepared in advance.</div>
+            <div class="timeline-tag">Fine Dining · Brickell</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"><div class="timeline-dot-text">00:00</div></div>
+          <div class="timeline-content">
+            <div class="timeline-time">Midnight</div>
+            <div class="timeline-venue">LIV Nightclub</div>
+            <div class="timeline-detail">VIP booth reserved. Bottle service arranged. Your host will escort you past the line.</div>
+            <div class="timeline-tag">Nightlife · Miami Beach</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"><div class="timeline-dot-text">03:00</div></div>
+          <div class="timeline-content">
+            <div class="timeline-time">3:00 AM</div>
+            <div class="timeline-venue">Space Miami</div>
+            <div class="timeline-detail">After-hours access. No queues, no limits. The city at its most alive.</div>
+            <div class="timeline-tag">After Hours · Downtown</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="border-color:rgba(212,168,232,0.5);background:rgba(212,168,232,0.08);"><div class="timeline-dot-text" style="color:rgba(212,168,232,0.8);">05:00+</div></div>
+          <div class="timeline-content">
+            <div class="timeline-time" style="color:rgba(212,168,232,0.7);">Dawn</div>
+            <div class="timeline-venue" style="color:#D4A8E8;">Velvet Room</div>
+            <div class="timeline-detail">The finest experiences are never listed. Katherine is available.</div>
+            <div class="timeline-tag" style="background:rgba(212,168,232,0.08);border-color:rgba(212,168,232,0.2);color:rgba(212,168,232,0.7);">By Request Only</div>
+          </div>
+        </div>
+      </div>
+      <div class="faceid-confirm-box">
+        <div class="faceid-confirm-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"><path d="M9 9a3 3 0 1 1 6 0c0 2-3 3-3 5"/><circle cx="12" cy="19" r="1" fill="var(--gold)"/><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <div class="faceid-confirm-text">
+          <div class="faceid-confirm-label">BIOMETRIC CONFIRMATION</div>
+          <div class="faceid-confirm-sub">Your identity confirms your commitment. This programme will be activated upon verification.</div>
+        </div>
+      </div>
+      <div style="padding:0 20px 8px;">
+        <button class="btn-gold" onclick="showScreen('host-a-night')">Add a Host to My Night</button>
+      </div>
+      <div style="padding:8px 20px 24px;">
+        <button class="btn-outline" onclick="showScreen('confirmation')">Confirm & Activate</button>
+      </div>
+    </div>
+    <!-- FLOATING MIC -->
+    <div class="float-mic" title="Voice Command">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(200,169,110,0.9)" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0014 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+    </div>
+  </div>
+
+  <!-- ==================== HOST A NIGHT ==================== -->
+  <div class="screen" id="host-a-night">
+    <div class="status-bar" style="position:absolute;top:0;left:0;right:0;z-index:5;">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="host-hero">
+      <img src="/hok_assets/finch.jpg" alt="Alfred Fincher">
+      <div class="host-hero-overlay"></div>
+      <div class="host-hero-badge">
+        <div class="host-name">Alfred Fincher</div>
+        <div class="host-title-tag"><span class="host-title-text">YOUR HOST TONIGHT</span></div>
+      </div>
+      <button class="back-btn" style="position:absolute;top:52px;left:16px;" onclick="showScreen('night-timeline')">‹</button>
+    </div>
+    <div class="host-body">
+      <div class="host-desc">Alfred knows Miami the way few people do. A former professional athlete, he moves through the city's most exclusive circles with the ease of someone who belongs there, because he does. He has direct relationships with LIV, Space, and every private room worth knowing. He doesn't escort you through the night. He shapes it. He reads the room, knows when to accelerate and when to hold back, and stays as long as the evening demands. What happens with your host remains with your host, without exception.</div>
+      <button class="btn-gold" onclick="showScreen('confirmation')">Add Host & Confirm Night</button>
+    </div>
+    <!-- CENTERED VOICE COMMAND -->
+    <div style="display:flex;justify-content:center;padding:12px 0 16px;flex-shrink:0;">
+      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(200,169,110,0.25),rgba(200,169,110,0.08));border:1.5px solid rgba(200,169,110,0.6);display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(200,169,110,0.15);cursor:pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0014 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- VENDOR SCREENS REMOVED FROM CLIENT PROTOTYPE -->
+  <!-- ==================== VENDOR LOGIN (hidden) ==================== -->
+  <div class="screen" id="vendor-login">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-top:20px;">
+      <div style="text-align:center;margin-bottom:32px;">
+        <img src="/hok_assets/hok_logo.webp" style="width:60px;height:60px;object-fit:contain;margin-bottom:12px;" alt="HOK">
+        <div class="vendor-badge"><span class="vendor-badge-text">Partner Portal</span></div>
+        <div style="color:var(--cream);font-size:20px;margin-top:8px;">Vendor Access</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label class="input-label">Email</label>
+          <input class="input-field" type="email" placeholder="your@venue.com">
+        </div>
+        <div>
+          <label class="input-label">Password</label>
+          <input class="input-field" type="password" placeholder="••••••••">
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <button class="btn-gold" onclick="showScreen('vendor-dashboard')">Sign In</button>
+      <div style="text-align:center;">
+        <button class="btn-ghost" onclick="showScreen('home')">← Member Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== VENDOR DASHBOARD ==================== -->
+  <div class="screen" id="vendor-dashboard">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+
+    <!-- Push notification -->
+    <div class="push-notif" id="push-notif" onclick="showScreen('reservation-detail')">
+      <div class="push-icon">🔔</div>
+      <div>
+        <div class="push-app">Haus of Katherine</div>
+        <div class="push-title">New Booking Request</div>
+        <div class="push-body">Fine Dining · 2 guests · Tonight 8:00 PM</div>
+      </div>
+    </div>
+
+    <div class="scroll-content">
+      <div style="padding:16px 20px 12px;">
+        <div class="screen-title">Partner Dashboard</div>
+        <div class="heading-md" style="margin-top:2px;">Welcome, Carbone Miami</div>
+      </div>
+      <div class="gold-line" style="margin:0 16px 16px;"></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Today's Bookings</div></div>
+        <div class="stat-card"><div class="stat-num">18</div><div class="stat-label">This Week</div></div>
+        <div class="stat-card"><div class="stat-num">$4,200</div><div class="stat-label">Revenue MTD</div></div>
+      </div>
+      <div class="section-header" style="margin-top:16px;">
+        <span class="section-title">Recent Activity</span>
+      </div>
+      <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px;">
+        <div class="res-item" onclick="showScreen('reservation-detail')">
+          <div class="res-top"><span class="res-service">Fine Dining Reservation</span><span class="res-new">NEW</span></div>
+          <div class="res-client">A.F. · 2 guests · Special occasion</div>
+          <div class="res-bottom" style="margin-top:8px;"><span class="res-datetime">Tonight · 8:00 PM</span><span class="res-amount">$380</span></div>
+        </div>
+        <div class="res-item">
+          <div class="res-top"><span class="res-service">Private Dining Room</span><span style="background:rgba(100,180,100,0.15);color:#80C880;font-size:10px;padding:3px 10px;border-radius:10px;font-family:-apple-system,sans-serif;">Confirmed</span></div>
+          <div class="res-client">M.R. · 6 guests · Business dinner</div>
+          <div class="res-bottom" style="margin-top:8px;"><span class="res-datetime">Aug 6 · 7:30 PM</span><span class="res-amount">$1,200</span></div>
+        </div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item active"><div class="nav-icon">⌂</div><div class="nav-label">Dashboard</div></div>
+      <div class="nav-item" onclick="showScreen('vendor-services')"><div class="nav-icon">✦</div><div class="nav-label">Services</div></div>
+      <div class="nav-item" onclick="showScreen('vendor-reservations')"><div class="nav-icon">📋</div><div class="nav-label">Bookings</div></div>
+      <div class="nav-item"><div class="nav-icon">◎</div><div class="nav-label">Profile</div></div>
+    </div>
+  </div>
+
+  <!-- ==================== VENDOR SERVICES ==================== -->
+  <div class="screen" id="vendor-services">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="page-header">
+      <div style="flex:1;">
+        <div class="screen-title">Manage</div>
+        <div class="heading-md">My Services</div>
+      </div>
+      <button class="add-btn" onclick="showScreen('add-service')">+ Add</button>
+    </div>
+    <div class="scroll-content">
+      <div class="vendor-svc-list">
+        <div class="vendor-svc-item">
+          <img src="/hok_assets/services/fine_dining.jpg" class="vendor-svc-thumb" alt="">
+          <div class="vendor-svc-info">
+            <div class="vendor-svc-name">Fine Dining Experience</div>
+            <div class="vendor-svc-cat">Dining · From $180/person</div>
+          </div>
+          <span class="svc-active">Active</span>
+        </div>
+        <div class="vendor-svc-item">
+          <img src="/hok_assets/services/private_events.jpg" class="vendor-svc-thumb" alt="">
+          <div class="vendor-svc-info">
+            <div class="vendor-svc-name">Private Dining Room</div>
+            <div class="vendor-svc-cat">Events · From $800</div>
+          </div>
+          <span class="svc-active">Active</span>
+        </div>
+        <div class="vendor-svc-item">
+          <img src="/hok_assets/services/nightlife.jpg" class="vendor-svc-thumb" alt="">
+          <div class="vendor-svc-info">
+            <div class="vendor-svc-name">VIP Nightlife Package</div>
+            <div class="vendor-svc-cat">Nightlife · From $500</div>
+          </div>
+          <span style="background:rgba(100,100,100,0.2);color:var(--text-muted);font-size:10px;padding:3px 8px;border-radius:10px;font-family:-apple-system,sans-serif;">Draft</span>
+        </div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="showScreen('vendor-dashboard')"><div class="nav-icon">⌂</div><div class="nav-label">Dashboard</div></div>
+      <div class="nav-item active"><div class="nav-icon">✦</div><div class="nav-label">Services</div></div>
+      <div class="nav-item" onclick="showScreen('vendor-reservations')"><div class="nav-icon">📋</div><div class="nav-label">Bookings</div></div>
+      <div class="nav-item"><div class="nav-icon">◎</div><div class="nav-label">Profile</div></div>
+    </div>
+  </div>
+
+  <!-- ==================== ADD SERVICE ==================== -->
+  <div class="screen" id="add-service">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="page-header">
+      <button class="back-btn" onclick="showScreen('vendor-services')">‹</button>
+      <div class="page-header-title">Add New Service</div>
+    </div>
+    <div class="scroll-content">
+      <div class="add-form">
+        <div>
+          <label class="input-label">Service Name</label>
+          <input class="input-field" type="text" placeholder="e.g. Sunset Yacht Charter">
+        </div>
+        <div>
+          <label class="input-label">Category</label>
+          <div class="category-pills">
+            <div class="pill selected">Fine Dining</div>
+            <div class="pill">Yachting</div>
+            <div class="pill">Wellness</div>
+            <div class="pill">Exotic Cars</div>
+            <div class="pill">Private Jet</div>
+            <div class="pill">Events</div>
+            <div class="pill">Nightlife</div>
+            <div class="pill">Other</div>
+          </div>
+        </div>
+        <div>
+          <label class="input-label">Description</label>
+          <input class="input-field" type="text" placeholder="Describe your service...">
+        </div>
+        <div class="form-row">
+          <div>
+            <label class="input-label">Starting From</label>
+            <input class="input-field" type="text" placeholder="$0">
+          </div>
+          <div>
+            <label class="input-label">Availability</label>
+            <input class="input-field" type="text" placeholder="Daily">
+          </div>
+        </div>
+        <div>
+          <label class="input-label">Photo</label>
+          <div style="background:rgba(255,255,255,0.04);border:1px dashed rgba(200,169,110,0.3);border-radius:12px;padding:24px;text-align:center;cursor:pointer;">
+            <div style="font-size:28px;margin-bottom:8px;">📷</div>
+            <div style="color:var(--text-muted);font-size:13px;font-family:-apple-system,sans-serif;">Upload Service Photo</div>
+          </div>
+        </div>
+        <button class="btn-gold" onclick="showScreen('vendor-services')">Save & Publish</button>
+        <div style="height:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== VENDOR RESERVATIONS ==================== -->
+  <div class="screen" id="vendor-reservations">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="page-header">
+      <div style="flex:1;">
+        <div class="screen-title">Incoming</div>
+        <div class="heading-md">Reservations</div>
+      </div>
+    </div>
+    <div class="filter-tabs">
+      <div class="filter-tab active">All</div>
+      <div class="filter-tab">New</div>
+      <div class="filter-tab">Confirmed</div>
+      <div class="filter-tab">Completed</div>
+    </div>
+    <div class="scroll-content">
+      <div class="res-list">
+        <div class="res-item" onclick="showScreen('reservation-detail')">
+          <div class="res-top"><span class="res-service">Fine Dining Reservation</span><span class="res-new">NEW</span></div>
+          <div class="res-client">Client: A.F. · 2 guests · Special occasion</div>
+          <div class="res-bottom" style="margin-top:8px;"><span class="res-datetime">Tonight · 8:00 PM</span><span class="res-amount">$380</span></div>
+        </div>
+        <div class="res-item" onclick="showScreen('reservation-detail')">
+          <div class="res-top"><span class="res-service">Private Dining Room</span><span style="background:rgba(100,180,100,0.15);color:#80C880;font-size:10px;padding:3px 10px;border-radius:10px;font-family:-apple-system,sans-serif;">Confirmed</span></div>
+          <div class="res-client">Client: M.R. · 6 guests · Business dinner</div>
+          <div class="res-bottom" style="margin-top:8px;"><span class="res-datetime">Aug 6 · 7:30 PM</span><span class="res-amount">$1,200</span></div>
+        </div>
+        <div class="res-item">
+          <div class="res-top"><span class="res-service">Fine Dining Experience</span><span style="background:rgba(100,100,100,0.2);color:var(--text-muted);font-size:10px;padding:3px 10px;border-radius:10px;font-family:-apple-system,sans-serif;">Completed</span></div>
+          <div class="res-client">Client: J.W. · 4 guests</div>
+          <div class="res-bottom" style="margin-top:8px;"><span class="res-datetime">Jul 28 · 7:00 PM</span><span class="res-amount">$720</span></div>
+        </div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="showScreen('vendor-dashboard')"><div class="nav-icon">⌂</div><div class="nav-label">Dashboard</div></div>
+      <div class="nav-item" onclick="showScreen('vendor-services')"><div class="nav-icon">✦</div><div class="nav-label">Services</div></div>
+      <div class="nav-item active"><div class="nav-icon">📋</div><div class="nav-label">Bookings</div></div>
+      <div class="nav-item"><div class="nav-icon">◎</div><div class="nav-label">Profile</div></div>
+    </div>
+  </div>
+
+  <!-- ==================== RESERVATION DETAIL ==================== -->
+  <div class="screen" id="reservation-detail">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">●●● WiFi <svg width="16" height="11" viewBox="0 0 25 12" fill="var(--cream)" style="vertical-align:middle;"><rect x="0" y="3" width="5" height="9" rx="1" opacity="0.4"/><rect x="7" y="2" width="5" height="10" rx="1" opacity="0.6"/><rect x="14" y="1" width="5" height="11" rx="1" opacity="0.8"/><rect x="21" y="0" width="4" height="12" rx="1"/></svg></span>
+    </div>
+    <div class="page-header">
+      <button class="back-btn" onclick="showScreen('vendor-reservations')">‹</button>
+      <div class="page-header-title">Booking Detail</div>
+    </div>
+    <div class="scroll-content">
+      <div class="res-detail-body">
+        <div class="res-amount-big">$380</div>
+        <div class="res-amount-label">Booking Value</div>
+        <div class="res-detail-card">
+          <div class="res-detail-row"><span class="res-detail-key">Service</span><span class="res-detail-val">Fine Dining Reservation</span></div>
+          <div class="res-detail-row"><span class="res-detail-key">Client</span><span class="res-detail-val">A.F. (HOK Member)</span></div>
+          <div class="res-detail-row"><span class="res-detail-key">Date</span><span class="res-detail-val">Tonight, Aug 5</span></div>
+          <div class="res-detail-row"><span class="res-detail-key">Time</span><span class="res-detail-val">8:00 PM</span></div>
+          <div class="res-detail-row"><span class="res-detail-key">Guests</span><span class="res-detail-val">2</span></div>
+          <div class="res-detail-row"><span class="res-detail-key">Occasion</span><span class="res-detail-val">Special occasion</span></div>
+          <div class="res-detail-row"><span class="res-detail-key">Special Requests</span><span class="res-detail-val">Window table preferred</span></div>
+        </div>
+        <div class="action-btns">
+          <button class="btn-confirm" onclick="showScreen('vendor-reservations')">Confirm</button>
+          <button class="btn-decline" onclick="showScreen('vendor-reservations')">Decline</button>
+        </div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+  </div>
+
+</div><!-- end phone-shell -->
+
+<script>
+function showScreen(id) {
+  var el = document.getElementById(id);
+  if (!el) { console.warn('Screen not found:', id); return; }
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  el.classList.add('active');
+  // Scroll to top of phone shell
+  var shell = document.querySelector('.phone-shell');
+  if (shell) shell.scrollTop = 0;
+  window.scrollTo(0, 0);
+  // Hide push notification when navigating
+  var notif = document.getElementById('push-notif');
+  if (notif) notif.classList.remove('show');
+}
+
+// Make all nav-item and svc-card divs work on touch devices
+document.addEventListener('DOMContentLoaded', function() {
+  // Add touch support for all clickable divs
+  document.querySelectorAll('[onclick]').forEach(function(el) {
+    el.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      var fn = el.getAttribute('onclick');
+      if (fn) { try { eval(fn); } catch(err) {} }
+    }, {passive: false});
+  });
+});
+
+// Vendor dashboard observer removed - vendor mode not in client prototype
+
+// Vertical Infinite Loop Services Carousel
+(function() {
+  var services = [
+    {img: '/hok_assets/services/fine_dining.jpg', name: 'Fine Dining'},
+    {img: '/hok_assets/services/yachting.jpg', name: 'Yachting'},
+    {img: '/hok_assets/services/spa_wellness.jpg', name: 'Spa & Wellness'},
+    {img: '/hok_assets/services/exotic_cars.jpg', name: 'Exotic Cars'},
+    {img: '/hok_assets/services/private_jet.jpg', name: 'Private Jet'},
+    {img: '/hok_assets/services/limousine.jpg', name: 'Limousine'},
+    {img: '/hok_assets/services/private_events.jpg', name: 'Private Events'},
+    {img: '/hok_assets/services/nightlife.jpg', name: 'Members Events'},
+    {img: '/hok_assets/services/hospitality.jpg', name: 'Hospitality'},
+    {img: '/hok_assets/services/legal_advisory.jpg', name: 'Legal Advisory'}
+  ];
+  var CARD_H = 140; // card 130px + gap 10px
+  var VISIBLE = 5;  // render 5 cards: 2 above center, center, 2 below
+  var centerReal = 0; // real index in services array
+  var autoTimer;
+
+  function buildTrack() {
+    var track = document.getElementById('svc-v-track');
+    if (!track) return;
+    track.innerHTML = '';
+    track.style.transition = 'none';
+    // Render VISIBLE+1 cards: 2 above, 2 center, 2 below
+    var start = centerReal - 2;
+    for (var i = 0; i < 6; i++) {
+      var idx = ((start + i) % services.length + services.length) % services.length;
+      var s = services[idx];
+      var card = document.createElement('div');
+      card.className = 'svc-v-card';
+      card.innerHTML = '<img src="' + s.img + '" alt="' + s.name + '"><div class="svc-v-overlay"><div class="svc-v-name">' + s.name + '</div></div>';
+      card.addEventListener('click', function() { showScreen('service-detail'); });
+      card.addEventListener('touchend', function(e) { e.preventDefault(); showScreen('service-detail'); }, {passive: false});
+      track.appendChild(card);
+    }
+    // Position: first center card (index 2) near top of visible area
+    track.style.transform = 'translateY(-' + (1.5 * CARD_H) + 'px)';
+    applyCardStyles();
+  }
+
+  function applyCardStyles() {
+    var cards = document.querySelectorAll('#svc-v-track .svc-v-card');
+    // Two center cards: index 2 and 3 are both full size
+    cards.forEach(function(card, i) {
+      card.classList.remove('svc-center', 'svc-center2', 'svc-side', 'svc-far');
+      if (i === 2) card.classList.add('svc-center');
+      else if (i === 3) card.classList.add('svc-center2');
+      else if (i === 1 || i === 4) card.classList.add('svc-side');
+      else card.classList.add('svc-far');
+    });
+  }
+
+  function advance(dir) {
+    var track = document.getElementById('svc-v-track');
+    if (!track) return;
+    track.style.transition = 'transform 0.55s cubic-bezier(0.25,0.46,0.45,0.94)';
+    var newOffset = (1.5 + dir) * CARD_H;
+    track.style.transform = 'translateY(-' + newOffset + 'px)';
+    setTimeout(function() {
+      centerReal = ((centerReal + dir) % services.length + services.length) % services.length;
+      buildTrack();
+    }, 560);
+  }
+
+  function startAuto() {
+    autoTimer = setInterval(function() { advance(1); }, 3000);
+  }
+
+  function initVCarousel() {
+    var carousel = document.getElementById('svc-v-carousel');
+    if (!carousel) return;
+    buildTrack();
+    var startY = 0;
+    var isDragging = false;
+    // Touch support
+    carousel.addEventListener('touchstart', function(e) {
+      startY = e.touches[0].clientY;
+      clearInterval(autoTimer);
+    }, {passive: true});
+    carousel.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+    }, {passive: false});
+    carousel.addEventListener('touchend', function(e) {
+      var diff = startY - e.changedTouches[0].clientY;
+      if (Math.abs(diff) > 20) advance(diff > 0 ? 1 : -1);
+      startAuto();
+    }, {passive: true});
+    // Mouse drag support for desktop testing
+    carousel.addEventListener('mousedown', function(e) {
+      startY = e.clientY;
+      isDragging = true;
+      clearInterval(autoTimer);
+      e.preventDefault();
+    });
+    document.addEventListener('mouseup', function(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      var diff = startY - e.clientY;
+      if (Math.abs(diff) > 20) advance(diff > 0 ? 1 : -1);
+      startAuto();
+    });
+    startAuto();
+  }
+
+  var vObserver = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+      if (m.target.id === 'services' && m.target.classList.contains('active')) {
+        centerReal = 0;
+        clearInterval(autoTimer);
+        buildTrack();
+        startAuto();
+      }
+    });
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var svcScreen = document.getElementById('services');
+    if (svcScreen) vObserver.observe(svcScreen, {attributes: true, attributeFilter: ['class']});
+    initVCarousel();
+  });
+})();
+</script>
+</body>
+</html>
